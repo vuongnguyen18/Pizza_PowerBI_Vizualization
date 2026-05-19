@@ -39,15 +39,22 @@ The main objective of this project is to answer the following business questions
 
 ## Data Preparation and Modelling
 
-The original pizza sales dataset was transformed into a reporting-ready model in Power BI. The core transaction table was kept at **order-line level**, where each row represents a pizza item within an order. This avoids revenue and quantity inflation when analysing ingredients or product-level performance.
+The original pizza sales dataset was transformed into a reporting-ready model in Power BI with careful attention to data granularity. The main sales fact table was kept at the original **order-line level**, where each row represents one pizza item within a customer order. This design ensures that core sales measures such as revenue, quantity sold, order count, and average order value are calculated accurately without duplication.
+
+A key modelling issue addressed in this project was the treatment of pizza ingredients. Instead of expanding the main order detail table by ingredient, ingredients were separated into their own mapping structure. This was important because expanding each pizza line by ingredient would repeat the same sales transaction multiple times. As a result, measures such as total revenue and total quantity sold would be artificially inflated when ingredient-level analysis is performed.
+
+To avoid this problem, the model separates sales transactions from ingredient relationships. The order detail table remains at the pizza order-line grain, while ingredients are split into rows in a separate bridge table. This approach is more scalable than splitting ingredients into fixed columns such as Ingredient 1, Ingredient 2, and so on. A fixed-column design assumes a maximum number of ingredients per pizza, which may not hold true if new pizzas are added in the future. By storing ingredients as rows, the model can support any number of ingredients without data loss or additional restructuring.
 
 Key modelling decisions included:
 
-- Created a central **Fact Order Detail** table for sales transactions.
-- Built supporting dimension tables such as **Date**, **Pizza**, **Category**, **Size**, and **Ingredient**.
-- Split comma-separated ingredient values into a separate ingredient mapping table instead of expanding them directly into the sales fact table.
-- Created ranking slicers for **Top 5 / Bottom 5** analysis.
-- Created dynamic metric selection for switching between **Total Quantity Sold** and **Total Revenue**.
+- Kept the main `Fact_Order_Detail` table at the original order-line level.
+- Created supporting dimension tables such as `Dim_Date`, `Dim_Pizza`, `Dim_Category`, `Dim_Size`, and `Dim_Ingredient`.
+- Built a separate pizza-ingredient bridge table to handle the many-to-many relationship between pizzas and ingredients.
+- Split comma-separated ingredient values into rows rather than fixed columns to improve scalability and flexibility.
+- Avoided expanding the sales fact table by ingredients to prevent revenue and quantity inflation.
+- Created DAX measures for core KPIs such as total revenue, total orders, total quantity sold, average order value, and average pizzas per order.
+- Added ranking slicers for Top 5 / Bottom 5 analysis.
+- Created dynamic metric selection for switching between Total Quantity Sold and Total Revenue.
 - Added navigation buttons to improve report usability across dashboard pages.
 
 ---
